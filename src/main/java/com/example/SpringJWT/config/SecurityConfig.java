@@ -58,16 +58,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-
-        http
-                .addFilterBefore(new RefreshTokenFilter(jwtUtil), JWTFilter.class);
-
         http
                 .addFilterBefore(new JWTFilter(jwtUtil, logoutService), LoginFilter.class);
 
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
 
         http
                 .logout((auth) -> auth

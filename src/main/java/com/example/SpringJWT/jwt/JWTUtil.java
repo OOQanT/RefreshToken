@@ -1,5 +1,8 @@
 package com.example.SpringJWT.jwt;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -34,7 +37,13 @@ public class JWTUtil {
 
     //토큰에서 만료시간을 뽑아내는 메서드
     public Boolean isExpired(String token){
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        try{
+            return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        }catch (JwtException | IllegalArgumentException e){
+
+            // 따로 true를 반환하지 않으면 예외가 그대로 터짐 그래서 토큰이 만료되었다면 다음 로직을 위해 true를 반환
+            return true;
+        }
     }
 
     //로그인을 성공했을 때 successfulHandler를 통해 username, role, expireMs를 받고 토큰을 생성

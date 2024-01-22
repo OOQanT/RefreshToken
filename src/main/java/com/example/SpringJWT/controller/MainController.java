@@ -1,5 +1,6 @@
 package com.example.SpringJWT.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -24,5 +25,11 @@ public class MainController {
         String role = auth.getAuthority();
 
         return "Main Controller " + username + " " + role;
+    }
+
+    @GetMapping("/head")
+    public String addHead(HttpServletResponse response){
+        response.addHeader("new-Header","new-Header");
+        return "create-Header";
     }
 }

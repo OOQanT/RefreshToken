@@ -51,14 +51,27 @@ public class JWTFilter extends OncePerRequestFilter{ // 요청에 대해 한 번
             return;
         }
 
-        log.info("authorization now");
+        log.info("token expired={}", jwtUtil.isExpired(token));
 
         //토큰 소멸시간 검증
         if(jwtUtil.isExpired(token)){ // 토큰이 만료인 경우 인증 실패
-            log.info("token expired");
-            filterChain.doFilter(request,response);
-            return;
+            log.info("액세스 토큰 만료");
+
+            log.info("refreshToken={}",refreshToken);
+            log.info("refreshToken expired={}",jwtUtil.isExpired(refreshToken));
+            if (refreshToken != null && !jwtUtil.isExpired(refreshToken)) {
+                log.info("리프레시 토큰이 유효하므로 액세스 토큰 재발급");
+                String newAccessToken = jwtUtil.createJwt(jwtUtil.getUsername(refreshToken), jwtUtil.getRole(refreshToken), 600 * 600 * 10L);
+                response.addHeader("Authorization", "Bearer " + newAccessToken);
+                token = newAccessToken;
+            } else {
+                log.info("리프레시 토큰이 유효하지 않음 또는 존재하지 않음");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
+
+        log.info("authorization now");
 
         //토큰에서 username 과 role 획득
         String username = jwtUtil.getUsername(token);
